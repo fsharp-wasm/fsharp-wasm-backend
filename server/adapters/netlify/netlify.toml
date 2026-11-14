@@ -1,0 +1,7 @@
+# netlify deploy   (the edge function answers every path but /fn; the Node.js function is mounted under /fn)
+[functions]
+  directory = "netlify/functions"
+  included_files = ["GhostTodo.wasm"]
+
+[functions.ghost]
+  node_bundler = "esbuild"

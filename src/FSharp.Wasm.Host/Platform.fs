@@ -197,3 +197,43 @@ type WasmEdgeAdapter() =
                   "}"
                   ""
                   "main();" ]
+
+/// <summary>How a string crosses the boundary between a module and its host (the string ABI of the fsharp-wasm compiler).</summary>
+type StringAbi =
+    /// <summary>The JS String Builtins (<c>wasm:js-string</c>): needs an engine that compiles the module with <c>{ builtins: ["js-string"] }</c>.</summary>
+    | Builtins
+    /// <summary>The accessor exports (<c>WASMGC_STRING_ABI=exports</c>): no builtins; the host reads and builds strings through the module's exports.</summary>
+    | Exports
+
+/// <summary>
+/// What the platforms of the working backend modules (<c>server/</c> of this repository) are, as data: where the adapter lives, whether
+/// the platform hands the module over precompiled (so that no builtins can be asked for), and what state a module can rely on.
+/// </summary>
+module PlatformCapabilities =
+
+    /// <summary>The directory of the adapter below <c>server/adapters</c>; None for a platform without a working adapter (Fastly, Fermyon, WasmEdge need WASI components).</summary>
+    let adapterDirectory (kind: PlatformKind) : string option =
+        match kind with
+        | PlatformKind.Cloudflare -> Some "cloudflare"
+        | PlatformKind.Vercel -> Some "vercel"
+        | PlatformKind.Netlify -> Some "netlify"
+        | PlatformKind.Deno -> Some "deno"
+        | PlatformKind.Bun -> Some "bun"
+        | PlatformKind.NodeJs -> Some "node"
+        | _ -> None
+
+    /// <summary>True when the platform imports a <c>.wasm</c> as a ready <c>WebAssembly.Module</c> (Cloudflare Workers, Vercel Edge): the module is compiled by the platform, without the string builtins.</summary>
+    let precompiledModule (kind: PlatformKind) : bool =
+        match kind with
+        | PlatformKind.Cloudflare | PlatformKind.Vercel -> true
+        | _ -> false
+
+    /// <summary>The string ABI a module must be built with to run on the platform: Exports where the module is precompiled, otherwise either; Exports is the one that works everywhere.</summary>
+    let stringAbi (kind: PlatformKind) : StringAbi =
+        if precompiledModule kind then Exports else Exports
+
+    /// <summary>True when one instance serves requests one after the other and keeps its memory (a Durable Object, a server process): state lives in the instance and is persisted behind it.</summary>
+    let statefulInstance (kind: PlatformKind) : bool =
+        match kind with
+        | PlatformKind.Cloudflare | PlatformKind.Deno | PlatformKind.Bun | PlatformKind.NodeJs -> true
+        | _ -> false

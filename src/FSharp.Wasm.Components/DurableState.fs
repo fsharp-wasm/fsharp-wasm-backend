@@ -11,12 +11,12 @@ type IDurableStateStore =
     /// <summary>Save state for the given identifier.</summary>
     /// <param name="id">The state identifier.</param>
     /// <param name="state">The state to persist.</param>
-    abstract member Save<'T> : id: string -> state: 'T -> Async<unit>
+    abstract member Save<'T when 'T : not null> : id: string -> state: 'T -> Async<unit>
 
     /// <summary>Load state for the given identifier.</summary>
     /// <param name="id">The state identifier.</param>
     /// <returns>The deserialized state, or None if not found.</returns>
-    abstract member Load<'T> : id: string -> Async<'T option>
+    abstract member Load<'T when 'T : not null> : id: string -> Async<'T option>
 
     /// <summary>Delete state for the given identifier.</summary>
     /// <param name="id">The state identifier.</param>

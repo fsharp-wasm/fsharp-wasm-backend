@@ -1,5 +1,13 @@
 fsharp-wasm-backend
-Copyright 2026 Sascha Dewald
+Copyright 2026 The fsharp-wasm contributors
 
-Licensed under the Apache License, Version 2.0 (see LICENSE).  The repository was created under the MIT License and had no
-other content at the time of the change.
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Provenance: the .NET libraries under src/ (Protocol, Ghost, Reactive, Components, Auth, Contract, Observability, Dev, Sdk, Host) and their tests were written
+as a specification of the backend (the branch copilot/fsharp-wasmgc-backend-library-spec of the former aiqs4/fsharp-wasm-backend); the portable layer
+(src/FSharp.Wasm.Server), the demo, the JavaScript core and adapters, the matrix and their tests are new.
+
+Components that are not part of this work and keep their own licence:
+  lib/Fable, lib/fsharp                      git submodules, MIT
+  lib/fsharp-wasm, lib/fsharp-wasm-core, lib/fsharp-wasmecto   git submodules, Apache-2.0
+The platform runtimes the tests use (workerd, Miniflare, @edge-runtime/vm, esbuild, Deno, Bun, Node) are test-time tools and are not distributed here.

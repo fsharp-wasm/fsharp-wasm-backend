@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The demo application of the backend modules: a todo list that speaks GGBP.  The entry module GhostTodo becomes GhostTodo.wasm
+       (bash build/build.sh); the same sources run under .NET, where the tests call `GhostTodo.route` directly. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <RootNamespace>GhostTodo</RootNamespace>
+    <NuGetAudit>false</NuGetAudit>
+    <NoWarn>$(NoWarn);NU1900;NETSDK1188</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Todos.fs" />
+    <Compile Include="GhostTodo.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
+  </ItemGroup>
+</Project>

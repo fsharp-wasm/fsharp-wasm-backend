@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The portable layer of the backend modules: HTTP types, JSON, the GGBP wire format and the imports a module gets from its host
+       (server/runtime/server.js).  Written in the subset fsharp-wasm compiles — no System.IO, no exceptions, no System.Text — so the
+       same sources run under .NET (the tests) and as WebAssembly GC on Cloudflare, Vercel, Netlify, Deno, Bun and Node.  The
+       libraries beside it (FSharp.Wasm.Protocol, Ghost, Host, …) are the .NET reference this layer is checked against. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <RootNamespace>FSharp.Wasm.Server</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NuGetAudit>false</NuGetAudit>
+    <NoWarn>$(NoWarn);NU1900;NETSDK1188</NoWarn>
+  </PropertyGroup>
+  <!-- the collections of FSharp.Wasm.Core, only for the WebAssembly build (the front end sets FABLE_COMPILER_WASMGC) -->
+  <Import Project="$(FSharpWasmCoreDir)/FSharp.Wasm.Core.props" Condition="'$(FABLE_COMPILER_WASMGC)' == 'True'" />
+  <ItemGroup>
+    <!-- [<Import>] and nativeOnly: the stub of FSharp.Wasm.Core -->
+    <Compile Include="$(FSharpWasmCoreDir)/Interop.fs" />
+    <Compile Include="Numbers.fs" />
+    <Compile Include="Bytes.fs" />
+    <Compile Include="Ggbp.fs" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Http.fs" />
+    <Compile Include="Host.fs" />
+  </ItemGroup>
+</Project>

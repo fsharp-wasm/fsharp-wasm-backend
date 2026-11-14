@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="PortableTests.fs" />
+    <Compile Include="GhostTodoTests.fs" />
+    <Compile Include="PlatformTests.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- the portable layer and the demo built on it, and the .NET reference it is checked against -->
+    <ProjectReference Include="../../src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
+    <ProjectReference Include="../../demos/ghost-todo/GhostTodo.fsproj" />
+    <ProjectReference Include="../../src/FSharp.Wasm.Protocol/FSharp.Wasm.Protocol.fsproj" />
+    <ProjectReference Include="../../src/FSharp.Wasm.Host/FSharp.Wasm.Host.fsproj" />
+    <ProjectReference Include="../../src/FSharp.Wasm.Sdk/FSharp.Wasm.Sdk.fsproj" />
+  </ItemGroup>
+
+</Project>
