@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { EdgeVM } from "@edge-runtime/vm";
 import * as esbuild from "esbuild";
 import { Miniflare } from "miniflare";
+import { toRequest, toResult, viaFetch } from "./http.mjs";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
 const pkg = (name) => join(root, "dist/platforms", name);
@@ -18,13 +19,6 @@ const exe = (name) => (tools && name !== "bun" ? join(tools, name) : name);
 
 const freePort = () => new Promise((resolve) => { const s = netServer().listen(0, () => { const p = s.address().port; s.close(() => resolve(p)); }); });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-const toResult = async (res) => {
-  const bytes = new Uint8Array(await res.arrayBuffer());
-  return { status: res.status, type: res.headers.get("content-type") ?? "", headers: Object.fromEntries(res.headers), text: new TextDecoder().decode(bytes), bytes };
-};
-const toRequest = (base, method, path, { body, headers } = {}) => new Request(new URL(path, base), { method, headers, body: method === "GET" || method === "HEAD" ? undefined : body });
-const viaFetch = (base) => async (method, path, init) => toResult(await fetch(toRequest(base, method, path, init)));
 
 /** A server process of the platform's own runtime. */
 function processTarget({ name, host, command, args, env = () => ({}), cwd, persistent = false }) {
@@ -133,7 +127,7 @@ export const targets = [
     },
   },
   handlerTarget({
-    name: "vercel-node", host: "vercel-node",
+    name: "vercel-node", host: "vercel-node", base: "http://localhost/api/node/",
     load: async () => { const m = await import(pathToFileURL(join(pkg("vercel"), "api/node.mjs")).href); return (req) => ({ GET: m.GET, POST: m.POST, DELETE: m.DELETE, OPTIONS: m.OPTIONS, HEAD: m.HEAD })[req.method](req); },
   }),
   handlerTarget({
