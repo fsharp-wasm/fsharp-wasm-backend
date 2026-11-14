@@ -206,12 +206,12 @@ type StringAbi =
     | Exports
 
 /// <summary>
-/// What the platforms of the working backend modules (<c>server/</c> of this repository) are, as data: where the adapter lives, whether
+/// What the platforms of the working backend modules (the host and adapters of the <c>fsharp-wasm-edge</c> repository) are, as data: where the adapter lives, whether
 /// the platform hands the module over precompiled (so that no builtins can be asked for), and what state a module can rely on.
 /// </summary>
 module PlatformCapabilities =
 
-    /// <summary>The directory of the adapter below <c>server/adapters</c>; None for a platform without a working adapter (Fastly, Fermyon, WasmEdge need WASI components).</summary>
+    /// <summary>The directory of the adapter below <c>host/adapters</c> of <c>fsharp-wasm-edge</c>; None for a platform without a working adapter (Fastly, Fermyon, WasmEdge need WASI components).</summary>
     let adapterDirectory (kind: PlatformKind) : string option =
         match kind with
         | PlatformKind.Cloudflare -> Some "cloudflare"

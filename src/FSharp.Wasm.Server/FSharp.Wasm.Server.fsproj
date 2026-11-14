@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- The portable layer of the backend modules: HTTP types, JSON, the GGBP wire format and the imports a module gets from its host
-       (server/runtime/server.js).  Written in the subset fsharp-wasm compiles — no System.IO, no exceptions, no System.Text — so the
+       (host/runtime/server.js of fsharp-wasm-edge).  Written in the subset fsharp-wasm compiles — no System.IO, no exceptions, no System.Text — so the
        same sources run under .NET (the tests) and as WebAssembly GC on Cloudflare, Vercel, Netlify, Deno, Bun and Node.  The
        libraries beside it (FSharp.Wasm.Protocol, Ghost, Host, …) are the .NET reference this layer is checked against. -->
   <PropertyGroup>

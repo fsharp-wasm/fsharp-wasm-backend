@@ -9,6 +9,8 @@ env:
   # fixed revisions of what the build takes from other repositories (replace the compiler by a release binary when there is one)
   COMPILER_REF: 8976acca44ba4edc0ee45c47d8bee0db2cec00f0
   CORE_REF: 1c592e748a0c93ba8b040b21b55b808322dbd3aa
+  # the host the module is tested against: fsharp-wasm-edge at a fixed revision (the module and the host are developed apart)
+  EDGE_REF: d7b16cae5b00f7979324a113c768560d90bd83fd
 
 jobs:
   # The .NET libraries (the reference) and the portable layer with its tests.
@@ -30,8 +32,8 @@ jobs:
           FSHARP_WASM_CORE_DIR: ${{ github.workspace }}/core
         run: dotnet test FSharp.Wasm.slnx -c Release
 
-  # The module compiled by fsharp-wasm and run on every platform that can run here.
-  platforms:
+  # The module compiled by fsharp-wasm, and run on every platform that can run here by the host of fsharp-wasm-edge (the contract between them).
+  module:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -41,6 +43,12 @@ jobs:
           repository: fsharp-wasm/fsharp-wasm-core
           ref: ${{ env.CORE_REF }}
           path: core
+      - name: Host checkout (fsharp-wasm-edge)
+        uses: actions/checkout@v6
+        with:
+          repository: fsharp-wasm/fsharp-wasm-edge
+          ref: ${{ env.EDGE_REF }}
+          path: edge
       - name: Compiler checkout
         uses: actions/checkout@v6
         with:
@@ -78,7 +86,7 @@ jobs:
           ./build/build.sh -c Release
           test -f artifacts/bin/fsc/Release/net10.0/fsc.dll
 
-      # a fixed version (the one the checks of docs/deploy.md were made with); no call to the GitHub API, whose unauthenticated limit
+      # a fixed version (the one the host's checks were made with); no call to the GitHub API, whose unauthenticated limit
       # failed this step when three runs started at once
       - name: Install wasm-tools
         env:
@@ -95,14 +103,16 @@ jobs:
           FSHARP_COMPILER: ${{ github.workspace }}/compiler/vendor/fsharp/artifacts/bin/fsc/Release/net10.0/fsc.dll
         run: bash build/build.sh
 
-      - name: Package the platforms
+      - name: The module on every platform
+        working-directory: edge
+        env:
+          GHOST_WASM: ${{ github.workspace }}/dist/GhostTodo.wasm
         run: |
-          npm install
+          npm ci
           node build/package.mjs
-      - name: The same scenario on every platform
-        run: node tests/platforms/run.mjs
+          node tests/platforms/run.mjs
 
       - uses: actions/upload-artifact@v7
         with:
-          name: platforms
-          path: dist/platforms
+          name: module
+          path: dist/GhostTodo.wasm

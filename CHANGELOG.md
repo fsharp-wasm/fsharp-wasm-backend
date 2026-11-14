@@ -4,6 +4,12 @@ All notable changes to this repository are documented here (newest first).
 
 ## [Unreleased]
 
+### Changed
+- **The host moved to [fsharp-wasm-edge](https://github.com/fsharp-wasm/fsharp-wasm-edge)**: the JavaScript core and stores (`server/runtime`), the adapters for
+  Node, Bun, Deno, Cloudflare Workers, Vercel and Netlify, the GGBP client, the packager, the platform matrix, the live runner, the deploy workflow and
+  its documentation. This repository keeps the modules, the portable layer and the .NET reference libraries; its CI compiles the module and runs it on
+  the host at a fixed revision (the contract between module and host). The older entries below describe the code as it was written here.
+
 ### Added
 - **Continuous deployment** (`.github/workflows/deploy.yml`, `docs/deploy.md`): the `platforms` artifact of a CI run goes to Cloudflare (wrangler),
   Vercel and Netlify, then `tests/platforms/live.mjs` runs the 26 checks against the live URLs and compares the answers. Nothing is deployed
