@@ -28,14 +28,16 @@ answer: they give identical answers in 20 steps (unicode text, the patches decod
 | Deno 2.9 / Deno Deploy | the packaged adapter, as a process | the platform's own runtime | Deno KV, survives a restart |
 | Cloudflare Workers | the Worker and the Durable Object on **workerd** (Miniflare 4.20260730, workerd 1.20260730) | the platform's runtime and its Durable Object storage; **not deployed** | Durable Object storage, survives a restart |
 | Vercel Edge Functions | the edge adapter, bundled with `?module` as a ready `WebAssembly.Module`, in the Edge Runtime sandbox (`@edge-runtime/vm` 5.0) | an emulation; Vercel's bundler and platform are not exercised; **not deployed** | memory per instance |
-| Vercel Functions (Node) | the Node adapter's handlers, called in a Node 24 process | the handler contract; **not deployed** | memory per instance |
+| Vercel Functions (Node) | the Node adapter's handlers (mounted at `/api/node`), called in a Node 24 process | the handler contract; **not deployed** | memory per instance |
 | Netlify Edge Functions | the edge adapter under Deno, given a `Request` | Netlify's edge runtime is Deno; Netlify's bundler is not exercised; **not deployed** | memory per instance |
 | Netlify Functions | the function's handler, called in a Node 24 process | the handler contract; **not deployed** | memory per instance |
 
 Not supported: **Fastly Compute, Fermyon Spin, WasmEdge** run WASI *components*, not a module with a JavaScript host; the shim generators of
 `FSharp.Wasm.Host/Platform.fs` for them are sketches, not working adapters. Nothing has been deployed to a platform from here: the
 packages (`dist/platforms/<name>`) carry the configuration (`wrangler.toml`, `vercel.json`, `netlify.toml`, `deno.json`) for you to
-deploy; see [docs/platforms.md](docs/platforms.md).
+deploy; see [docs/platforms.md](docs/platforms.md). The workflow `.github/workflows/deploy.yml` deploys the CI artifact to Cloudflare, Vercel and
+Netlify and runs the scenario against the live URLs; what it needs, and what has been checked without an account, is in
+[docs/deploy.md](docs/deploy.md).
 
 ## Why the string ABI is "exports"
 

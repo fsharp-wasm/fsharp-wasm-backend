@@ -5,6 +5,10 @@ All notable changes to this repository are documented here (newest first).
 ## [Unreleased]
 
 ### Added
+- **Continuous deployment** (`.github/workflows/deploy.yml`, `docs/deploy.md`): the `platforms` artifact of a CI run goes to Cloudflare (wrangler),
+  Vercel and Netlify, then `tests/platforms/live.mjs` runs the 26 checks against the live URLs and compares the answers. Nothing is deployed
+  yet; `docs/deploy.md` lists accounts, tokens and settings, and what was checked without one (wrangler `--dry-run`, `netlify build --offline`,
+  actionlint, the runner against local servers over HTTP). `tests/platforms/http.mjs` and `report.mjs` are shared by both runners.
 - **Backend modules on Cloudflare Workers (with a Durable Object), Vercel, Netlify, Deno, Bun and Node.** `src/FSharp.Wasm.Server` is the
   portable layer (HTTP types, JSON, the GGBP wire format, UTF-8, hex, number parsing, the host imports of a module), `demos/ghost-todo`
   the demo application (a todo list whose changes are GGBP patches), `server/` the JavaScript core, the stores (memory, JSON file, Deno KV,
@@ -19,6 +23,9 @@ All notable changes to this repository are documented here (newest first).
   ABI, where its adapter is and whether an instance keeps state.
 
 ### Fixed
+- The Vercel Node.js function had no base path, so at its documented address `/api/node` every request was a 404; it is now mounted there
+  (`basePath`, a rewrite for the sub-paths) and the matrix calls it under that path. Netlify's package has a publish directory
+  (`netlify deploy` needs one).
 - `FSharp.Wasm.Components` did not build (the interfaces of the durable state and the queue lacked the `not null` constraint their
   implementations declare); the solution builds without warnings.
 

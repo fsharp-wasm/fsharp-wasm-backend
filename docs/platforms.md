@@ -3,7 +3,8 @@
 `node build/package.mjs` makes one directory per platform in `dist/platforms/`. Each is complete (the adapter where the platform expects
 its entry, `runtime/`, `GhostTodo.wasm`, the configuration). **None of this has been deployed from here**: the matrix runs the same
 code on the platform's runtime or an emulation of it (see the README), and these steps are the platforms' documented ways, not something this
-repository has done.
+repository has done. What a continuous deployment needs (accounts, tokens, settings) and what has been checked without one is in
+[deploy.md](deploy.md).
 
 ## Cloudflare Workers + Durable Object
 
@@ -25,7 +26,7 @@ npx vercel deploy
 ```
 
 `vercel.json` rewrites every path to `api/edge.js` (an Edge Function: `?module` makes the `.wasm` a ready `WebAssembly.Module`);
-`api/node.mjs` is the same on the Node.js runtime (24), reachable at `/api/node`. State is memory per instance.
+`api/node.mjs` is the same on the Node.js runtime (24), mounted at `/api/node` (a rewrite hands it the sub-paths). State is memory per instance.
 
 ## Netlify
 
