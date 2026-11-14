@@ -2,7 +2,7 @@ namespace FSharp.Wasm.Server
 
 open Fable.Core
 
-/// The functions the host (server/runtime/server.js) provides to a module: the request, the response, the store and a few facts.
+/// The functions the host (host/runtime/server.js of fsharp-wasm-edge) provides to a module: the request, the response, the store and a few facts.
 /// Every function is an import of "runtime/server.js"; strings cross as JS strings (the engine's string builtins, or the polyfill the
 /// host passes where an engine has none); numbers cross as numbers.  A module can send strings out but not receive them, so the
 /// request is read by calling these, and a binary body leaves byte by byte.  Under .NET they are `nativeOnly` stubs: tests call the
