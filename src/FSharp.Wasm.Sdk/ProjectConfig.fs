@@ -21,6 +21,16 @@ type WasmPlatform =
     | Fermyon
     /// <summary>WasmEdge runtime.</summary>
     | WasmEdge
+    /// <summary>Vercel (Edge Functions and Node.js Functions).</summary>
+    | Vercel
+    /// <summary>Netlify (Edge Functions and Functions).</summary>
+    | Netlify
+    /// <summary>Deno and Deno Deploy.</summary>
+    | Deno
+    /// <summary>Bun.</summary>
+    | Bun
+    /// <summary>Node.js.</summary>
+    | NodeJs
     /// <summary>Generic WASI-compatible runtime.</summary>
     | Generic
 
@@ -99,6 +109,11 @@ module ProjectConfig =
         | "fastly" -> Fastly
         | "fermyon" -> Fermyon
         | "wasmedge" -> WasmEdge
+        | "vercel" -> Vercel
+        | "netlify" -> Netlify
+        | "deno" -> Deno
+        | "bun" -> Bun
+        | "node" | "nodejs" -> NodeJs
         | _ -> Generic
 
     /// <summary>Extract a string value from a simple JSON key-value pair.</summary>

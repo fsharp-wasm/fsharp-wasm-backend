@@ -47,14 +47,14 @@ type MemoryKvStore() =
     let store = ConcurrentDictionary<string, obj>()
 
     interface IKvStore with
-        member _.Get<'T>(key: string) =
+        member _.Get<'T when 'T : not null>(key: string) =
             async {
                 match store.TryGetValue(key) with
                 | true, value -> return Some(value :?> 'T)
                 | _ -> return None
             }
 
-        member _.Set<'T>(key: string) (value: 'T) =
+        member _.Set<'T when 'T : not null>(key: string) (value: 'T) =
             async { store.[key] <- (value :> obj) }
 
         member _.Delete(key: string) =

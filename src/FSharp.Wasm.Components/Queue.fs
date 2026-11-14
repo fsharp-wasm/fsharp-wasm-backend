@@ -21,15 +21,15 @@ type QueueMessage<'T> =
 type IMessageQueue =
     /// <summary>Send a single message to the queue.</summary>
     /// <param name="message">The message to send.</param>
-    abstract member Send<'T> : message: 'T -> Async<unit>
+    abstract member Send<'T when 'T : not null> : message: 'T -> Async<unit>
 
     /// <summary>Send a batch of messages to the queue.</summary>
     /// <param name="messages">The messages to send.</param>
-    abstract member SendBatch<'T> : messages: 'T list -> Async<unit>
+    abstract member SendBatch<'T when 'T : not null> : messages: 'T list -> Async<unit>
 
     /// <summary>Receive the next available message from the queue.</summary>
     /// <returns>The next message, or None if the queue is empty.</returns>
-    abstract member Receive<'T> : unit -> Async<'T option>
+    abstract member Receive<'T when 'T : not null> : unit -> Async<'T option>
 
     /// <summary>Acknowledge successful processing of a message.</summary>
     /// <param name="messageId">The identifier of the message to acknowledge.</param>
@@ -50,7 +50,7 @@ type QueueConsumerConfig =
 /// In-memory implementation of <see cref="IMessageQueue"/> for testing.
 /// Backed by a <see cref="ConcurrentQueue{T}"/>.
 /// </summary>
-type MemoryQueue<'T>() =
+type MemoryQueue<'T when 'T : not null>() =
     let queue = ConcurrentQueue<obj>()
     let acknowledged = ConcurrentDictionary<string, bool>()
 
@@ -78,7 +78,7 @@ type MemoryQueue<'T>() =
 /// Processes messages from an <see cref="IMessageQueue"/> using a provided handler function.
 /// Tracks processed and failed message counts.
 /// </summary>
-type QueueProcessor<'T>(queue: IMessageQueue, handler: 'T -> Async<unit>) =
+type QueueProcessor<'T when 'T : not null>(queue: IMessageQueue, handler: 'T -> Async<unit>) =
 
     let mutable running = false
     let mutable processedCount = 0

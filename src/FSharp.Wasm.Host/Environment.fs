@@ -68,6 +68,14 @@ type PlatformKind =
     | Fermyon
     /// <summary>WasmEdge runtime.</summary>
     | WasmEdge
+    /// <summary>Vercel (Edge Functions and Node.js Functions).</summary>
+    | Vercel
+    /// <summary>Netlify (Edge Functions, which run on Deno, and Functions).</summary>
+    | Netlify
+    /// <summary>Deno and Deno Deploy.</summary>
+    | Deno
+    /// <summary>Bun.</summary>
+    | Bun
     /// <summary>Node.js with WASI support.</summary>
     | NodeJs
     /// <summary>Browser with WebAssembly.</summary>

@@ -10,8 +10,13 @@
     <Project Path="src/FSharp.Wasm.Protocol/FSharp.Wasm.Protocol.fsproj" />
     <Project Path="src/FSharp.Wasm.Reactive/FSharp.Wasm.Reactive.fsproj" />
     <Project Path="src/FSharp.Wasm.Sdk/FSharp.Wasm.Sdk.fsproj" />
+    <Project Path="src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
+  </Folder>
+  <Folder Name="/demos/">
+    <Project Path="demos/ghost-todo/GhostTodo.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FSharp.Wasm.Tests/FSharp.Wasm.Tests.fsproj" />
+    <Project Path="tests/FSharp.Wasm.Server.Tests/FSharp.Wasm.Server.Tests.fsproj" />
   </Folder>
 </Solution>
