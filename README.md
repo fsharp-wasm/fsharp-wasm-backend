@@ -38,12 +38,12 @@ WebAssembly build does not, so a module is built on `FSharp.Wasm.Server`.
 ## Build and run
 
 ```bash
-export FSHARP_WASM_CORE_DIR=/path/to/fsharp-wasm-core            # a checkout at 1c592e7 or later: the F# base library
+export FSHARP_WASM_CORE_DIR=/path/to/fsharp-wasm-core            # a checkout at cc6b1c0 or later: the F# base library
 dotnet test FSharp.Wasm.slnx -c Release                           # the .NET libraries and the portable layer
 
 # the module: a compiler, and wasm-tools on the PATH
 export FSHARP_WASM_BIN=/path/to/fsharp-wasm                       # the binary of a release, or
-export FSHARP_WASM_DIR=/path/to/fsharp-wasm                       # a checkout at 8976acc or later (needs FSHARP_COMPILER, the patched fsc.dll)
+export FSHARP_WASM_DIR=/path/to/fsharp-wasm                       # a checkout at 73131d3 or later (needs FSHARP_COMPILER, the patched fsc.dll)
 bash build/build.sh                                               # dist/GhostTodo.wasm
 ```
 

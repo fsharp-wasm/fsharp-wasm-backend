@@ -7,7 +7,7 @@
 # also runs where a module is precompiled without the JS String Builtins (Cloudflare Workers, Vercel Edge).
 # The compiler is not part of this repository; first hit wins:
 #   FSHARP_WASM_BIN   the self-contained `fsharp-wasm` executable of a release (it carries FSharp.Wasm.Core beside it)
-#   FSHARP_WASM_DIR   a checkout of fsharp-wasm (revision 8976acc or later: the Exports ABI): its CLI runs through `dotnet run` and
+#   FSHARP_WASM_DIR   a checkout of fsharp-wasm (revision 73131d3 or later: the Exports ABI): its CLI runs through `dotnet run` and
 #                     needs FSHARP_COMPILER = the patched fsc.dll built from the checkout's vendor/fsharp
 # `wasm-tools` must be on the PATH.
 set -euo pipefail
@@ -37,7 +37,7 @@ else
 fi
 wasm-tools validate "$WORK/GhostTodo.wasm" --features all
 if wasm-tools print "$WORK/GhostTodo.wasm" | grep -q 'import "wasm:js-string"'; then
-  echo "GhostTodo.wasm imports wasm:js-string: the compiler did not take WASMGC_STRING_ABI=exports (revision 8976acc or later needed)" >&2
+  echo "GhostTodo.wasm imports wasm:js-string: the compiler did not take WASMGC_STRING_ABI=exports (revision 73131d3 or later needed)" >&2
   exit 1
 fi
 mkdir -p "$OUT"

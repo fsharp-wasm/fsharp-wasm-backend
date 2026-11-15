@@ -36,6 +36,6 @@ All notable changes to this repository are documented here (newest first).
   implementations declare); the solution builds without warnings.
 
 ### Changed
-- The module is built with `WASMGC_STRING_ABI=exports` (fsharp-wasm 8976acc): the JS String Builtins are not available to a module a platform
+- The module is built with `WASMGC_STRING_ABI=exports` (fsharp-wasm 73131d3): the JS String Builtins are not available to a module a platform
   precompiles (workerd, Vercel Edge), where instantiating it fails.
 - Apache License 2.0 (`LICENSE`, `NOTICE`); the repository was restored from a backup and its histories joined.

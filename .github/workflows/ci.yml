@@ -7,10 +7,10 @@ on:
 
 env:
   # fixed revisions of what the build takes from other repositories (replace the compiler by a release binary when there is one)
-  COMPILER_REF: 8976acca44ba4edc0ee45c47d8bee0db2cec00f0
-  CORE_REF: 1c592e748a0c93ba8b040b21b55b808322dbd3aa
+  COMPILER_REF: 73131d3021f74c0eedb2be65f3ae9636dd74f10c
+  CORE_REF: cc6b1c03634629bad047ac2230742ff0f14e5897
   # the host the module is tested against: fsharp-wasm-edge at a fixed revision (the module and the host are developed apart)
-  EDGE_REF: d7b16cae5b00f7979324a113c768560d90bd83fd
+  EDGE_REF: 0449bc7eaa8df501d173eafd6cf5094c507d30a5
 
 jobs:
   # The .NET libraries (the reference) and the portable layer with its tests.
