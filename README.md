@@ -16,7 +16,7 @@ client keeps a *shadow* of the list and applies the patches the server sends (th
 ## What is verified
 
 - `dotnet test FSharp.Wasm.slnx -c Release`: 96 tests of the .NET libraries and 54 of the portable layer (the encoding equals the .NET reference's
-  bytes for 2000 random patches; decoding bad input never raises; UTF-8, hex, JSON and numbers against System.Text; the application's model and routes).
+  bytes for 2000 random patches; decoding bad input never raises; UTF-8, hex, and JSON and number parsing (FSharp.Wasm.Data) against System.Text; the application's model and routes).
 - **The contract with the host.** CI compiles `GhostTodo.wasm` and hands it to the host of fsharp-wasm-edge (at a fixed revision, `EDGE_REF`), which runs
   **the same 26 checks on every platform** that can run on a runner and compares the answers: identical in 20 steps. What each platform row means
   (a runtime or an emulation) and what is deployed is in the [fsharp-wasm-edge README](https://github.com/fsharp-wasm/fsharp-wasm-edge#what-is-verified);
@@ -26,7 +26,7 @@ client keeps a *shadow* of the list and applies the patches the server sends (th
 
 | path | what it is |
 |---|---|
-| `src/FSharp.Wasm.Server` | the portable layer, in the subset fsharp-wasm compiles: HTTP types, JSON, the GGBP wire format (byte for byte the format of `FSharp.Wasm.Protocol`), UTF-8, hex, number parsing, the imports of a module (`HostImports`) |
+| `src/FSharp.Wasm.Server` | the portable layer, in the subset fsharp-wasm compiles: HTTP types, the GGBP wire format (byte for byte the format of `FSharp.Wasm.Protocol`), UTF-8, hex, the imports of a module (`HostImports`); JSON and number parsing come from `FSharp.Wasm.Data` in fsharp-wasm-core |
 | `demos/ghost-todo` | the application: the model and its patches (`Todos.fs`), the routes and the exports `handle` / `reset` (`GhostTodo.fs`) |
 | `build/` | `build.sh` compiles the module to `dist/GhostTodo.wasm` (string ABI: exports; `wasm-tools` must be on the PATH) |
 | `tests/FSharp.Wasm.Server.Tests` | 54 tests of the portable layer against the .NET reference, the application, and the platform table |
@@ -38,12 +38,12 @@ WebAssembly build does not, so a module is built on `FSharp.Wasm.Server`.
 ## Build and run
 
 ```bash
-export FSHARP_WASM_CORE_DIR=/path/to/fsharp-wasm-core            # a checkout at cc6b1c0 or later: the F# base library
+export FSHARP_WASM_CORE_DIR=/path/to/fsharp-wasm-core            # a checkout at 52afb74 or later: the F# base library and FSharp.Wasm.Data (JSON, numbers)
 dotnet test FSharp.Wasm.slnx -c Release                           # the .NET libraries and the portable layer
 
 # the module: a compiler, and wasm-tools on the PATH
 export FSHARP_WASM_BIN=/path/to/fsharp-wasm                       # the binary of a release, or
-export FSHARP_WASM_DIR=/path/to/fsharp-wasm                       # a checkout at 73131d3 or later (needs FSHARP_COMPILER, the patched fsc.dll)
+export FSHARP_WASM_DIR=/path/to/fsharp-wasm                       # a checkout at 7a79ad6 or later (needs FSHARP_COMPILER, the patched fsc.dll)
 bash build/build.sh                                               # dist/GhostTodo.wasm
 ```
 

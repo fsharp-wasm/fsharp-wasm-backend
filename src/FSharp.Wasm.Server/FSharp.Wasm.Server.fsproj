@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- The portable layer of the backend modules: HTTP types, JSON, the GGBP wire format and the imports a module gets from its host
+  <!-- The portable layer of the backend modules: HTTP types, the GGBP wire format and the imports a module gets from its host
        (host/runtime/server.js of fsharp-wasm-edge).  Written in the subset fsharp-wasm compiles — no System.IO, no exceptions, no System.Text — so the
        same sources run under .NET (the tests) and as WebAssembly GC on Cloudflare, Vercel, Netlify, Deno, Bun and Node.  The
        libraries beside it (FSharp.Wasm.Protocol, Ghost, Host, …) are the .NET reference this layer is checked against. -->
@@ -16,11 +16,13 @@
   <ItemGroup>
     <!-- [<Import>] and nativeOnly: the stub of FSharp.Wasm.Core -->
     <Compile Include="$(FSharpWasmCoreDir)/Interop.fs" />
-    <Compile Include="Numbers.fs" />
     <Compile Include="Bytes.fs" />
     <Compile Include="Ggbp.fs" />
-    <Compile Include="Json.fs" />
     <Compile Include="Http.fs" />
     <Compile Include="Host.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- JSON and number parsing are not the backend's: they are FSharp.Wasm.Data, shared with the other repositories -->
+    <ProjectReference Include="$(FSharpWasmCoreRoot)/FSharp.Wasm.Data/FSharp.Wasm.Data.fsproj" />
   </ItemGroup>
 </Project>

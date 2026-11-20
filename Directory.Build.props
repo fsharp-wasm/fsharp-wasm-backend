@@ -1,9 +1,11 @@
 <Project>
-  <!-- Where FSharp.Wasm.Core is — the F# base library (collections, host-interop attributes) that programs compiled by fsharp-wasm are
-       built with.  FSHARP_WASM_CORE_DIR: a checkout of fsharp-wasm-core; otherwise the submodule lib/fsharp-wasm-core.  Only the
-       projects that are compiled to WebAssembly (FSharp.Wasm.Server and the demos) read it. -->
+  <!-- Where fsharp-wasm-core is: FSharp.Wasm.Core (the F# base library — collections, host-interop attributes — that programs compiled by
+       fsharp-wasm are built with) and FSharp.Wasm.Data (JSON and number parsing, which FSharp.Wasm.Server builds on).
+       FSHARP_WASM_CORE_DIR: a checkout of fsharp-wasm-core; otherwise the submodule lib/fsharp-wasm-core.  Only the projects that
+       are compiled to WebAssembly (FSharp.Wasm.Server and the demos) read it. -->
   <PropertyGroup>
-    <FSharpWasmCoreDir Condition="'$(FSharpWasmCoreDir)' == '' and '$(FSHARP_WASM_CORE_DIR)' != ''">$(FSHARP_WASM_CORE_DIR)/FSharp.Wasm.Core</FSharpWasmCoreDir>
-    <FSharpWasmCoreDir Condition="'$(FSharpWasmCoreDir)' == ''">$(MSBuildThisFileDirectory)lib/fsharp-wasm-core/FSharp.Wasm.Core</FSharpWasmCoreDir>
+    <FSharpWasmCoreRoot Condition="'$(FSharpWasmCoreRoot)' == '' and '$(FSHARP_WASM_CORE_DIR)' != ''">$(FSHARP_WASM_CORE_DIR)</FSharpWasmCoreRoot>
+    <FSharpWasmCoreRoot Condition="'$(FSharpWasmCoreRoot)' == ''">$(MSBuildThisFileDirectory)lib/fsharp-wasm-core</FSharpWasmCoreRoot>
+    <FSharpWasmCoreDir Condition="'$(FSharpWasmCoreDir)' == ''">$(FSharpWasmCoreRoot)/FSharp.Wasm.Core</FSharpWasmCoreDir>
   </PropertyGroup>
 </Project>

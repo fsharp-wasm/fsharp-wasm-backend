@@ -7,8 +7,8 @@ on:
 
 env:
   # fixed revisions of what the build takes from other repositories (replace the compiler by a release binary when there is one)
-  COMPILER_REF: 73131d3021f74c0eedb2be65f3ae9636dd74f10c
-  CORE_REF: cc6b1c03634629bad047ac2230742ff0f14e5897
+  COMPILER_REF: 7a79ad6b07745169a606f9121eea03c148313bcd
+  CORE_REF: 52afb741ce65cb5690030549aa0a7b7e7bb1203c
   # the host the module is tested against: fsharp-wasm-edge at a fixed revision (the module and the host are developed apart)
   EDGE_REF: 0449bc7eaa8df501d173eafd6cf5094c507d30a5
 

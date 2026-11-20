@@ -1,5 +1,7 @@
 namespace FSharp.Wasm.Server
 
+open FSharp.Wasm.Data
+
 /// The body of a response: text (JSON, HTML) or bytes (a binary patch).
 type Payload =
     | Text of string

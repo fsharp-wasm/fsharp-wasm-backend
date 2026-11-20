@@ -5,6 +5,12 @@ All notable changes to this repository are documented here (newest first).
 ## [Unreleased]
 
 ### Changed
+- **JSON and number parsing come from [fsharp-wasm-core](https://github.com/fsharp-wasm/fsharp-wasm-core) (`FSharp.Wasm.Data`).** `FSharp.Wasm.Server` no
+  longer has its own `Json.fs` and `Numbers.fs`; it references the shared project, which has the union of what this repository and the newsletter
+  had (the 64-level nesting limit and strict string rules from here; error positions, a pretty printer and accessors with fallbacks from there).
+  The namespace of `Json`, `JNull`…`JObj` and `Numbers` is `FSharp.Wasm.Data` now (add `open FSharp.Wasm.Data`); `Json.parse` of the old module is
+  `Json.tryParse` (`Json.parse` returns a `Result` with the position of the first problem). The tests of both stay here as the check against
+  System.Text. `GhostTodo.wasm` grows from 47,146 to 49,625 bytes. CI pins core at 52afb74 and the compiler at 7a79ad6.
 - **The host moved to [fsharp-wasm-edge](https://github.com/fsharp-wasm/fsharp-wasm-edge)**: the JavaScript core and stores (`server/runtime`), the adapters for
   Node, Bun, Deno, Cloudflare Workers, Vercel and Netlify, the GGBP client, the packager, the platform matrix, the live runner, the deploy workflow and
   its documentation. This repository keeps the modules, the portable layer and the .NET reference libraries; its CI compiles the module and runs it on

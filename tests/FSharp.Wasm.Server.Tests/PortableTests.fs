@@ -6,6 +6,7 @@ module PortableTests
 open System
 open System.Text
 open Xunit
+open FSharp.Wasm.Data
 open FSharp.Wasm.Server
 open FSharp.Wasm.Server.Ggbp
 
@@ -208,7 +209,7 @@ let ``JSON text round-trips through stringify and parse`` () =
                "neg", JNum -7.0
                "flags", JArr [ JBool true; JBool false; JNull ]
                "nested", JObj [ "empty", JArr []; "o", JObj [] ] ]
-    Assert.Equal(Some value, Json.parse (Json.stringify value))
+    Assert.Equal(Some value, Json.tryParse (Json.stringify value))
 
 [<Fact>]
 let ``JSON is what System.Text.Json reads`` () =
@@ -219,21 +220,21 @@ let ``JSON is what System.Text.Json reads`` () =
 
 [<Fact>]
 let ``the parser reads standard JSON, with escapes and surrogate pairs`` () =
-    Assert.Equal(Some(JStr "é"), Json.parse "\"\\u00e9\"")
-    Assert.Equal(Some(JStr "🚀"), Json.parse "\"\\ud83d\\ude80\"")
-    Assert.Equal(Some(JObj [ "k", JArr [ JNum 1.0; JNum 2.0 ] ]), Json.parse " { \"k\" : [ 1 , 2 ] } ")
-    Assert.Equal(Some(JNum 1500.0), Json.parse "1.5e3")
+    Assert.Equal(Some(JStr "é"), Json.tryParse "\"\\u00e9\"")
+    Assert.Equal(Some(JStr "🚀"), Json.tryParse "\"\\ud83d\\ude80\"")
+    Assert.Equal(Some(JObj [ "k", JArr [ JNum 1.0; JNum 2.0 ] ]), Json.tryParse " { \"k\" : [ 1 , 2 ] } ")
+    Assert.Equal(Some(JNum 1500.0), Json.tryParse "1.5e3")
 
 [<Fact>]
 let ``the parser gives None for what is not JSON, and never raises`` () =
     for bad in [ ""; "{"; "}"; "[1,"; "{\"a\"}"; "{\"a\":}"; "{a:1}"; "[1 2]"; "\"unterminated"; "\"bad \\q escape\""; "tru"; "nul"; "01x"; "{\"a\":1} extra"; "\"\\u12\""; "\"tab\there\"" ] do
-        Assert.Equal(None, Json.parse bad)
+        Assert.Equal(None, Json.tryParse bad)
     // nesting deeper than the limit is refused instead of overflowing the stack
-    Assert.Equal(None, Json.parse (String('[', 1000) + String(']', 1000)))
+    Assert.Equal(None, Json.tryParse (String('[', 1000) + String(']', 1000)))
 
 [<Fact>]
 let ``field and the accessors`` () =
-    let v = (Json.parse "{\"text\":\"hi\",\"n\":3,\"ok\":true}").Value
+    let v = (Json.tryParse "{\"text\":\"hi\",\"n\":3,\"ok\":true}").Value
     Assert.Equal(Some "hi", Json.asString (Json.field "text" v))
     Assert.Equal(Some 3.0, Json.asNumber (Json.field "n" v))
     Assert.Equal(Some true, Json.asBool (Json.field "ok" v))

@@ -13,6 +13,7 @@
 /// (what a host on a stateless platform calls before each request).
 module GhostTodo
 
+open FSharp.Wasm.Data
 open FSharp.Wasm.Server
 open GhostTodoCore
 
@@ -77,7 +78,7 @@ let route (state: State) (store: Store) (req: Request) : Response =
                                   "todos", JNum(float (List.length model.Todos)) ])
         | "GET", [ "api"; "state" ] -> Http.json 200 (Todos.stateJson model)
         | "POST", [ "api"; "todos" ] ->
-            match Json.parse req.Body |> Option.bind (Json.field "text") |> Json.asString with
+            match Json.tryParse req.Body |> Option.bind (Json.field "text") |> Json.asString with
             | None -> Http.badRequest "expected {\"text\": \"…\"}"
             | Some text ->
                 match Todos.add text txn model with

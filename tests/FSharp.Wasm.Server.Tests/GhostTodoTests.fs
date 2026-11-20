@@ -3,6 +3,7 @@ module GhostTodoTests
 
 open System.Collections.Generic
 open Xunit
+open FSharp.Wasm.Data
 open FSharp.Wasm.Server
 open FSharp.Wasm.Server.Ggbp
 open GhostTodoCore
@@ -16,7 +17,7 @@ let private memory () : Store * Dictionary<string, string> =
 
 let private req meth path body : Request = { Method = meth; Path = path; Query = []; Headers = []; Body = body }
 let private bodyOf (r: Response) = match r.Body with Text t -> t | Bytes b -> failwithf "bytes: %A" b
-let private jsonOf (r: Response) = (Json.parse (bodyOf r)).Value
+let private jsonOf (r: Response) = (Json.tryParse (bodyOf r)).Value
 
 let private decoded (hex: string) =
     match decode (Hex.decode hex).Value with

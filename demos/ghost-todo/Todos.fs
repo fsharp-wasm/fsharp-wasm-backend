@@ -1,5 +1,6 @@
 namespace GhostTodoCore
 
+open FSharp.Wasm.Data
 open FSharp.Wasm.Server
 open FSharp.Wasm.Server.Ggbp
 
@@ -127,7 +128,7 @@ module Todos =
 
     /// None when the text is not a snapshot of this model.
     let restore (text: string) : Model option =
-        match Json.parse text with
+        match Json.tryParse text with
         | None -> None
         | Some j ->
             match Json.asNumber (Json.field "version" j), Json.asNumber (Json.field "nextId" j),
