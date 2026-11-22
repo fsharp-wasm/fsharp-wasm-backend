@@ -10,7 +10,7 @@ env:
   COMPILER_REF: e820a4e3af38b74c751fc3e90fb9065b1126e476
   CORE_REF: 529ec49eb4d740e403a4725bcd881620fa8b74d0
   # the canvas client (demos/ghost-todo-canvas) builds on the widgets and the browser glue
-  GRAPHICS_REF: 4299f365d46ae3901083d48800d70e0420970200
+  GRAPHICS_REF: 3b147944f94916639962af4c8a4a7008ce0508ba
   RUNTIME_REF: dc56bd70aba3bbf23ae8ad82d5ffc6dd8e4106e2
   # the host the module is tested against: fsharp-wasm-edge at a fixed revision (the module and the host are developed apart)
   EDGE_REF: 8baea3e4c9deec4f322475c48cfe9617809ebb36
