@@ -7,7 +7,7 @@ on:
 
 env:
   # fixed revisions of what the build takes from other repositories (replace the compiler by a release binary when there is one)
-  COMPILER_REF: e820a4e3af38b74c751fc3e90fb9065b1126e476
+  COMPILER_REF: daf1a3218dc4b53f76b91da3565c3d3edec3ab0a
   CORE_REF: 529ec49eb4d740e403a4725bcd881620fa8b74d0
   # the canvas client (demos/ghost-todo-canvas) builds on the widgets and the browser glue
   GRAPHICS_REF: 3b147944f94916639962af4c8a4a7008ce0508ba
