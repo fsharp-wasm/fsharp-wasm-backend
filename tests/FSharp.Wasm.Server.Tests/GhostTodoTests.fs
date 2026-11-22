@@ -137,19 +137,88 @@ let ``bad requests are 400, unknown things 404, known paths with another method 
     Assert.Equal(204, status "OPTIONS" "/api/todos" "")
     Assert.Equal(200, status "GET" "/healthz" "")
 
+/// A script of mutations over HTTP: n adds, then toggles and removes in turn.
+let private mutate (state: GhostTodo.State) (store: Store) (n: int) =
+    for i in 1 .. n do
+        GhostTodo.route state store (req "POST" "/api/todos" (sprintf "{\"text\":\"todo %d\"}" i)) |> ignore
+        if i % 3 = 0 then GhostTodo.route state store (req "POST" (sprintf "/api/todos/%d/toggle" (i - 1)) "") |> ignore
+        if i % 5 = 0 then GhostTodo.route state store (req "DELETE" (sprintf "/api/todos/%d" (i - 2)) "") |> ignore
+
+let private coldStart (store: Store) : GhostTodo.State =
+    let s = GhostTodo.State()
+    s.EnsureLoaded store
+    s
+
 [<Fact>]
-let ``the state is persisted after a mutation and loaded by a new instance`` () =
+let ``a mutation persists its patch, a few dozen bytes however long the list, and not the state`` () =
     let store, d = memory ()
+    let state = GhostTodo.State()
+    mutate state store 300
+    Assert.False(d.ContainsKey "state")                                   // the checkpoint is written by `compact`, not by a request
+    let logKeys = d.Keys |> Seq.filter (fun k -> k.StartsWith "log/") |> Seq.toList
+    Assert.Equal(int state.Model.Version, logKeys.Length)
+    Assert.True(d.Values |> Seq.forall (fun v -> v.Length < 200), "every persisted value is one patch")
+    let first = decoded d.["log/1"]
+    Assert.Equal(1u, first.Version)
+
+[<Fact>]
+let ``a cold start replays the patches after the checkpoint and holds the model of the instance that wrote them`` () =
+    let store, _ = memory ()
     let first = GhostTodo.State()
-    GhostTodo.route first store (req "POST" "/api/todos" "{\"text\":\"keep me\"}") |> ignore
-    Assert.True(d.ContainsKey "state")
-    let second = GhostTodo.State()                      // a cold start: nothing in memory, the store has it
-    let r = GhostTodo.route second store (req "GET" "/api/state" "")
-    Assert.Contains("keep me", bodyOf r)
+    mutate first store 40
+    Assert.Equal(first.Model, (coldStart store).Model)
+    Assert.Contains("todo 40", bodyOf (GhostTodo.route (coldStart store) store (req "GET" "/api/state" "")))
     // Reset makes an instance read the store again (a stateless platform whose instances share it)
+    let second = coldStart store
     GhostTodo.route second store (req "POST" "/api/todos" "{\"text\":\"two\"}") |> ignore
     first.Reset()
     Assert.Contains("two", bodyOf (GhostTodo.route first store (req "GET" "/api/state" "")))
+
+[<Fact>]
+let ``folding the log into a checkpoint writes the state and drops the entries it covers`` () =
+    let store, d = memory ()
+    let state = GhostTodo.State()
+    mutate state store 45                                                 // 45 adds, 15 toggles and 9 removes: 69 versions, beyond CompactEvery
+    Assert.True(state.CompactionDue)
+    GhostTodo.compact state store
+    Assert.True(d.ContainsKey "state")
+    Assert.Empty(d.Keys |> Seq.filter (fun k -> k.StartsWith "log/"))
+    Assert.False(state.CompactionDue)
+    Assert.Equal(state.Model.Version, state.Checkpoint)
+    Assert.Equal(state.Model, (coldStart store).Model)                    // the checkpoint alone is the model (it carries the log window)
+    mutate state store 3                                                  // entries after the checkpoint, on top of it
+    Assert.Equal(state.Model, (coldStart store).Model)
+    GhostTodo.compact state store                                         // not due: nothing is written or dropped
+    Assert.Equal(4, d.Keys |> Seq.filter (fun k -> k.StartsWith "log/") |> Seq.length)   // the 3 adds and the toggle
+
+[<Fact>]
+let ``a removed todo's id is not given again after a restart, with or without a checkpoint`` () =
+    let store, _ = memory ()
+    let state = GhostTodo.State()
+    for t in [ "a"; "b" ] do GhostTodo.route state store (req "POST" "/api/todos" (sprintf "{\"text\":\"%s\"}" t)) |> ignore
+    GhostTodo.route state store (req "DELETE" "/api/todos/2" "") |> ignore
+    Assert.Equal(3, (coldStart store).Model.NextId)                       // from the log alone
+    mutate state store 45
+    GhostTodo.compact state store
+    Assert.True(state.Checkpoint > 0u)
+    Assert.Equal(state.Model.NextId, (coldStart store).Model.NextId)      // from the checkpoint
+
+[<Fact>]
+let ``a log that has a gap or a corrupt entry ends there, and the next mutation continues from that version`` () =
+    let store, d = memory ()
+    let state = GhostTodo.State()
+    mutate state store 8
+    let full = state.Model.Version
+    Assert.True(full > 5u)
+    d.Remove "log/4" |> ignore
+    Assert.Equal(3u, (coldStart store).Model.Version)                     // 1, 2, 3 replay; 5 and later are beyond the gap
+    d.["log/4"] <- "not hexadecimal"
+    Assert.Equal(3u, (coldStart store).Model.Version)
+    let again = coldStart store
+    let r = GhostTodo.route again store (req "POST" "/api/todos" "{\"text\":\"after the gap\"}")
+    Assert.Equal(Some 4.0, Json.asNumber (Json.field "version" (jsonOf r)))   // it takes the place of the lost entry
+    Assert.Equal(again.Model, (coldStart store).Model)                    // the entries of the old line of history behind the gap are gone, not replayed as its continuation
+    Assert.False(d.ContainsKey "log/5")
 
 [<Fact>]
 let ``patches since a version, and the binary patch`` () =

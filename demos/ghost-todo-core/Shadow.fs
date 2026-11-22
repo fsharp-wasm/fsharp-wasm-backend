@@ -76,3 +76,39 @@ module Shadow =
 
     let applyHex (hex: string) (shadow: Shadow) : Result<Shadow, ApplyError> =
         decodeHex hex |> Result.bind (fun (patch, _) -> apply patch shadow)
+
+/// The server's side of the same patch format: the model one patch further, by the transition a client uses (`Shadow.apply`).  A model rebuilt from a checkpoint and the patches after it
+/// is therefore the model a client holds at that version, and what a mutation persists is what it sends.
+module Replay =
+    /// The next id after `patch`: one more than any id it inserts (a removed todo's id is never given again).
+    let private nextIdAfter (nextId: int) (patch: Patch) : int =
+        patch.Ops
+        |> List.fold
+            (fun n op ->
+                match op with
+                | ListMutation(node, field, listOp, _, value) when node = Todos.Root && field = Todos.ListField && listOp = ListOp.Insert ->
+                    (match Todos.decodeRecord value with
+                     | Some todo -> max n (todo.Id + 1)
+                     | None -> n)
+                | _ -> n)
+            nextId
+
+    /// The model after the patch of `hex`; None when it is not the next version or does not apply (the log ends there).
+    let step (model: Model) (hex: string) : Model option =
+        match Shadow.decodeHex hex with
+        | Error _ -> None
+        | Ok(patch, _) ->
+            match Shadow.apply patch { Version = model.Version; Todos = model.Todos } with
+            | Error _ -> None
+            | Ok shadow ->
+                let entry = { Version = patch.Version; Transaction = patch.TransactionId; Hex = hex }
+                Some { Version = shadow.Version
+                       NextId = nextIdAfter model.NextId patch
+                       Todos = shadow.Todos
+                       Log = List.truncate Todos.MaxLog (entry :: model.Log) }
+
+    /// The model after every consecutive patch the store holds beyond `model`'s version (it stops at the first one that is missing or does not apply).
+    let rec fromStore (get: string -> string option) (model: Model) : Model =
+        match get (Todos.logKey (model.Version + 1u)) |> Option.bind (step model) with
+        | Some next -> fromStore get next
+        | None -> model

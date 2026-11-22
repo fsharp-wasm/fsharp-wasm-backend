@@ -11,6 +11,10 @@
 /// `patch` is the GGBP patch in hex; a mutation may carry the id of the client's transaction in the header x-transaction.
 /// The export `handle` is what the host calls for every request; `reset` makes the next request reload the state from the store
 /// (what a host on a stateless platform calls before each request).
+///
+/// What is persisted: a mutation writes its own patch (`log/<version>`, the hex the clients receive), a few dozen bytes however long the list is.  A checkpoint of the whole state is
+/// written by the export `idle`, which the host calls once the response has gone out when `handle` asked for it (`Host.requestIdle`: the log has grown by `Todos.CompactEvery`
+/// versions); it also drops the log entries the checkpoint covers.  A cold start reads the checkpoint and replays the entries after it (`Replay.fromStore`).
 module GhostTodo
 
 open FSharp.Wasm.Data
@@ -21,32 +25,49 @@ open GhostTodoCore
 type State() =
     let mutable loaded = false
     let mutable model = Todos.empty
+    /// The version of the checkpoint in the store: the log entries after it are what a mutation persisted since.
+    let mutable checkpoint = 0u
 
     member _.Model = model
+    member _.Checkpoint = checkpoint
     member _.Reset() = loaded <- false
     member _.Set(m: Model) = model <- m
-    /// Load the persisted state once; a snapshot that does not parse is ignored (the list starts empty).
+    member _.CheckpointAt(version: uint32) = checkpoint <- version
+    /// The log beyond the checkpoint is long enough to be folded into a new one.
+    member _.CompactionDue = model.Version - checkpoint >= uint32 Todos.CompactEvery
+    /// Load the persisted state once: the checkpoint (one that does not parse is ignored: the list starts empty) and every patch after it that the store holds.
     member _.EnsureLoaded(store: Store) =
         if not loaded then
             loaded <- true
-            match store.Get "state" |> Option.bind Todos.restore with
-            | Some m -> model <- m
-            | None -> ()
+            let start = store.Get "state" |> Option.bind Todos.restore |> Option.defaultValue Todos.empty
+            checkpoint <- start.Version
+            model <- Replay.fromStore store.Get start
 
 let private mutation (model: Model) (patch: Ggbp.Patch) (todo: Todo) : Json =
     JObj [ "version", JNum(float model.Version)
            "transaction", JNum(float patch.TransactionId)
-           "patch", JStr(Hex.encode (Ggbp.encode patch))
+           "patch", JStr model.Log.Head.Hex
            "todo", Todos.todoJson todo ]
 
-/// Persist what a mutation produced and answer.
+/// Persist what a mutation produced and answer: the patch, not the state (the checkpoint is `compact`'s).
 let private commit (state: State) (store: Store) (status: int) (result: (Model * Ggbp.Patch * Todo) option) : Response =
     match result with
     | None -> Http.notFound
     | Some(model, patch, todo) ->
         state.Set model
-        store.Put "state" (Todos.snapshot model)
+        store.Put (Todos.logKey model.Version) model.Log.Head.Hex
+        // nothing may stand behind the head of the log: an entry of an older line of history (after a gap, a store that was behind) must not be replayed as this one's continuation
+        store.Delete(Todos.logKey (model.Version + 1u))
         Http.json status (mutation model patch todo)
+
+/// Fold the log into a new checkpoint: write the state, then drop the log entries it covers.  The checkpoint goes first, so a call that is interrupted leaves entries that the next load skips.
+let compact (state: State) (store: Store) : unit =
+    if state.CompactionDue then
+        let model = state.Model
+        store.Put "state" (Todos.snapshot model)
+        for v in int state.Checkpoint + 1 .. int model.Version do
+            store.Delete(Todos.logKey (uint32 v))
+        state.CheckpointAt model.Version
 
 let private transaction (req: Request) : uint32 option =
     Http.header "x-transaction" req |> Option.bind Numbers.parseUInt32
@@ -113,7 +134,16 @@ let route (state: State) (store: Store) (req: Request) : Response =
 let private state = State()
 
 [<CompiledName("handle")>]
-let handle () : unit = Host.run (route state Host.store)
+let handle () : unit =
+    Host.run (route state Host.store)
+    // the answer does not wait for the checkpoint: the host calls `idle` after it
+    if state.CompactionDue then Host.requestIdle ()
+
+/// What the host calls after a response when `handle` asked for it (`Host.requestIdle`): the work that need not make a request wait.
+[<CompiledName("idle")>]
+let idle () : unit =
+    state.EnsureLoaded Host.store
+    compact state Host.store
 
 [<CompiledName("reset")>]
 let reset () : unit = state.Reset()

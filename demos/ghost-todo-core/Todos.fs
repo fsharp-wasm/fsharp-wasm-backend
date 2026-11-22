@@ -36,6 +36,12 @@ module Todos =
     let MaxLog = 64
     [<Literal>]
     let MaxTextLength = 200
+    /// After this many versions beyond the last snapshot the module asks to be called again (`idle`) to write a new one and drop the log entries it covers.
+    [<Literal>]
+    let CompactEvery = 64
+
+    /// Where a mutation is persisted: the key of the patch that produced `version`.  The value is the patch as the server sends it, in hexadecimal.
+    let logKey (version: uint32) : string = "log/" + string version
 
     let empty : Model = { Version = 0u; NextId = 1; Todos = []; Log = [] }
 
@@ -100,7 +106,7 @@ module Todos =
     let stateJson (m: Model) : Json =
         JObj [ "version", JNum(float m.Version); "todos", JArr(List.map todoJson m.Todos) ]
 
-    /// What is persisted: the state, the next id and the log.
+    /// A checkpoint: the state, the next id and the log.  A mutation does not write this (it writes its patch under `logKey`); `idle` does, now and then.
     let snapshot (m: Model) : string =
         Json.stringify (
             JObj [ "version", JNum(float m.Version)
