@@ -13,7 +13,7 @@ env:
   GRAPHICS_REF: 3b147944f94916639962af4c8a4a7008ce0508ba
   RUNTIME_REF: dc56bd70aba3bbf23ae8ad82d5ffc6dd8e4106e2
   # the host the module is tested against: fsharp-wasm-edge at a fixed revision (the module and the host are developed apart)
-  EDGE_REF: 772ee11c13f4b587de8029c72d6117a293a57736
+  EDGE_REF: 30e817a728f5503bfd64f07cce226a2932c25e0d
 
 jobs:
   # The .NET libraries (the reference) and the portable layer with its tests.
