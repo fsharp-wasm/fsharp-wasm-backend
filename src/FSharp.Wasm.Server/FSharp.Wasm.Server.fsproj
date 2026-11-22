@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- The portable layer of the backend modules: HTTP types, the GGBP wire format and the imports a module gets from its host
-       (host/runtime/server.js of fsharp-wasm-edge).  Written in the subset fsharp-wasm compiles — no System.IO, no exceptions, no System.Text — so the
-       same sources run under .NET (the tests) and as WebAssembly GC on Cloudflare, Vercel, Netlify, Deno, Bun and Node.  The
-       libraries beside it (FSharp.Wasm.Protocol, Ghost, Host, …) are the .NET reference this layer is checked against. -->
+  <!-- The portable layer of the backend modules: HTTP types and the GGBP wire format (with the UTF-8 and hex it needs).  What a module gets from its host
+       (host/runtime/server.js of fsharp-wasm-edge) is FSharp.Wasm.Server.Host, a project of its own: a client that speaks the protocol builds on this one and
+       has no host.  Written in the subset fsharp-wasm compiles — no System.IO, no exceptions, no System.Text — so the same sources run under .NET (the tests)
+       and as WebAssembly GC on Cloudflare, Vercel, Netlify, Deno, Bun, Node and in a browser.  The libraries beside it (FSharp.Wasm.Protocol, Ghost, Host, …)
+       are the .NET reference this layer is checked against. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>preview</LangVersion>
@@ -14,12 +15,9 @@
   <!-- the collections of FSharp.Wasm.Core, only for the WebAssembly build (the front end sets FABLE_COMPILER_WASMGC) -->
   <Import Project="$(FSharpWasmCoreDir)/FSharp.Wasm.Core.props" Condition="'$(FABLE_COMPILER_WASMGC)' == 'True'" />
   <ItemGroup>
-    <!-- [<Import>] and nativeOnly: the stub of FSharp.Wasm.Core -->
-    <Compile Include="$(FSharpWasmCoreDir)/Interop.fs" />
     <Compile Include="Bytes.fs" />
     <Compile Include="Ggbp.fs" />
     <Compile Include="Http.fs" />
-    <Compile Include="Host.fs" />
   </ItemGroup>
   <ItemGroup>
     <!-- JSON and number parsing are not the backend's: they are FSharp.Wasm.Data, shared with the other repositories -->

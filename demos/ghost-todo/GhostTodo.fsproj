@@ -9,10 +9,11 @@
     <NoWarn>$(NoWarn);NU1900;NETSDK1188</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Todos.fs" />
     <Compile Include="GhostTodo.fs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../ghost-todo-core/GhostTodoCore.fsproj" />
     <ProjectReference Include="../../src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
+    <ProjectReference Include="../../src/FSharp.Wasm.Server.Host/FSharp.Wasm.Server.Host.fsproj" />
   </ItemGroup>
 </Project>

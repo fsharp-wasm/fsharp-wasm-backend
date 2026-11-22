@@ -25,6 +25,18 @@ module Http =
     let segments (path: string) : string list =
         path.Split('/') |> Array.filter (fun s -> s <> "") |> List.ofArray
 
+    /// `a=1&b=&c` -> ["a", "1"; "b", ""; "c", ""] (the text between the pairs and after the `=` as it is: a host decodes before, a page's `location.search` is the raw one).
+    let parseQuery (raw: string) : (string * string) list =
+        if raw = "" then []
+        else
+            raw.Split('&')
+            |> Array.filter (fun s -> s <> "")
+            |> Array.map (fun pair ->
+                match pair.IndexOf '=' with
+                | -1 -> pair, ""
+                | i -> pair.Substring(0, i), pair.Substring(i + 1))
+            |> List.ofArray
+
     let header (name: string) (req: Request) : string option =
         let lower = name.ToLowerInvariant()
         req.Headers |> List.tryFind (fun (k, _) -> k.ToLowerInvariant() = lower) |> Option.map snd

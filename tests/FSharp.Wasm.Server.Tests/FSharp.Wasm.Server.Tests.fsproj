@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="PortableTests.fs" />
     <Compile Include="GhostTodoTests.fs" />
+    <Compile Include="ShadowTests.fs" />
     <Compile Include="PlatformTests.fs" />
   </ItemGroup>
 
@@ -21,6 +22,7 @@
   <ItemGroup>
     <!-- the portable layer and the demo built on it, and the .NET reference it is checked against -->
     <ProjectReference Include="../../src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
+    <ProjectReference Include="../../demos/ghost-todo-core/GhostTodoCore.fsproj" />
     <ProjectReference Include="../../demos/ghost-todo/GhostTodo.fsproj" />
     <ProjectReference Include="../../src/FSharp.Wasm.Protocol/FSharp.Wasm.Protocol.fsproj" />
     <ProjectReference Include="../../src/FSharp.Wasm.Host/FSharp.Wasm.Host.fsproj" />

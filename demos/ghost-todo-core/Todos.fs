@@ -109,7 +109,7 @@ module Todos =
                    "log", JArr(List.map entryJson m.Log) ]
         )
 
-    let private todoOfJson (j: Json) : Todo option =
+    let internal todoOfJson (j: Json) : Todo option =
         match Json.asNumber (Json.field "id" j), Json.asString (Json.field "text" j), Json.asBool (Json.field "done" j) with
         | Some id, Some text, Some isDone -> Some { Id = int id; Text = text; Done = isDone }
         | _ -> None
@@ -119,7 +119,7 @@ module Todos =
         | Some v, Some t, Some hex -> Some { Version = uint32 v; Transaction = uint32 t; Hex = hex }
         | _ -> None
 
-    let private items (convert: Json -> 'a option) (j: Json option) : 'a list option =
+    let internal items (convert: Json -> 'a option) (j: Json option) : 'a list option =
         match j with
         | Some(JArr xs) ->
             let converted = List.map convert xs

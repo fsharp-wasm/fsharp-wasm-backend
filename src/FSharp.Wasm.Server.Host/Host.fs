@@ -65,17 +65,6 @@ module Host =
           Put = fun key value -> HostImports.storePut key value
           Delete = fun key -> HostImports.storeDelete key }
 
-    let private parseQuery (raw: string) : (string * string) list =
-        if raw = "" then []
-        else
-            raw.Split('&')
-            |> Array.filter (fun s -> s <> "")
-            |> Array.map (fun pair ->
-                match pair.IndexOf '=' with
-                | -1 -> pair, ""
-                | i -> pair.Substring(0, i), pair.Substring(i + 1))
-            |> List.ofArray
-
     let private parseHeaders (raw: string) : (string * string) list =
         let parts = raw.Split('\n')
         [ for i in 0 .. 2 .. parts.Length - 2 -> parts.[i], parts.[i + 1] ]
@@ -84,7 +73,7 @@ module Host =
     let request () : Request =
         { Method = HostImports.reqMethod ()
           Path = HostImports.reqPath ()
-          Query = parseQuery (HostImports.reqQuery ())
+          Query = Http.parseQuery (HostImports.reqQuery ())
           Headers = parseHeaders (HostImports.reqHeaders ())
           Body = HostImports.reqBody () }
 
