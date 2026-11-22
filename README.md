@@ -46,7 +46,7 @@ F# (GhostTodoCore: the model, the shadow)  ──┬── + FSharp.Wasm.Server.
 | `src/FSharp.Wasm.Server` | the portable layer, in the subset fsharp-wasm compiles: HTTP types, the GGBP wire format (byte for byte the format of `FSharp.Wasm.Protocol`), UTF-8, hex; JSON and number parsing come from `FSharp.Wasm.Data` in fsharp-wasm-core. A client builds on this one |
 | `src/FSharp.Wasm.Server.Host` | what a module that runs on a host needs of it: the imports from the host (`HostImports`), the key-value store, the loop that reads the request and hands over the response. Apart on purpose: a browser has none of these imports |
 | `demos/ghost-todo-core` | what the server and its clients share: the model and its patches (`Todos.fs`) and the client side of the format, the **shadow** (`Shadow.fs`) |
-| `demos/ghost-todo` | the application: the routes and the exports `handle` / `reset` (`GhostTodo.fs`) |
+| `demos/ghost-todo` | the application: the routes and the exports `handle` / `reset` / `idle` (`GhostTodo.fs`); what it persists and why: [docs/persistence.md](docs/persistence.md) |
 | `demos/ghost-todo-canvas` | the canvas client: `Model.fs` (a pure function; the requests it wants are data), `View.fs` (widgets), `GhostTodoCanvas.fs` (the exports; where the requests are made), `web/index.html` (the page) |
 | `build/` | `build.sh` compiles a module to `dist/` (`--module server`, the default: `GhostTodo.wasm`, string ABI exports; `--module canvas`: `GhostTodoCanvas.wasm` and `dist/canvas/`, the page with its runtime, to be served at `/canvas/`); `wasm-tools` must be on the PATH |
 | `tests/FSharp.Wasm.Server.Tests` | 71 tests of the portable layer against the .NET reference, the application, the shadow, the canvas client and the platform table |
