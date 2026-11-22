@@ -43,6 +43,10 @@ module HostImports =
     [<Import("storeDelete", "runtime/server.js")>]
     let storeDelete (key: string) : unit = nativeOnly
 
+    /// Ask the host to call the module's `idle` export once the response has gone out and the store is written (see `Host.requestIdle`).
+    [<Import("requestIdle", "runtime/server.js")>]
+    let requestIdle () : unit = nativeOnly
+
     /// Where this module runs: "node", "bun", "deno", "cloudflare-workers", "vercel-edge", …
     [<Import("hostName", "runtime/server.js")>]
     let hostName () : string = nativeOnly
@@ -64,6 +68,10 @@ module Host =
         { Get = fun key -> (match HostImports.storeGet key with | "" -> None | v -> Some v)
           Put = fun key value -> HostImports.storePut key value
           Delete = fun key -> HostImports.storeDelete key }
+
+    /// Ask the host to call the module's `idle` export after this request: work that need not make the request wait, such as folding what was persisted into a checkpoint.
+    /// The host runs it after the response, one task at a time with the requests (the module has one state); a host that cannot (an older one) simply does not.
+    let requestIdle () : unit = HostImports.requestIdle ()
 
     let private parseHeaders (raw: string) : (string * string) list =
         let parts = raw.Split('\n')
