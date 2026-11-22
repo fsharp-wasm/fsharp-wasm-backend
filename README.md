@@ -1,5 +1,9 @@
 # fsharp-wasm-backend
 
+<!-- platform -->
+> **Part of the [fsharp-wasm platform](https://fsharp-wasm.github.io/projects/)**: server and edge. Builds on [core](https://github.com/fsharp-wasm/fsharp-wasm-core), [graphics](https://github.com/fsharp-wasm/fsharp-wasm-graphics) and [runtime](https://github.com/fsharp-wasm/fsharp-wasm-runtime) (the canvas client only). Used by [edge](https://github.com/fsharp-wasm/fsharp-wasm-edge) runs its modules.
+> [All projects](https://fsharp-wasm.github.io/projects/) · [Roadmap](https://fsharp-wasm.github.io/docs/roadmap/) · [Tests](https://fsharp-wasm.github.io/tests/) · [Benchmarks](https://fsharp-wasm.github.io/benchmarks/) · [Live demos](https://fsharp-wasm.github.io/demos/)
+
 Backend modules written in F#, compiled to WebAssembly GC by [fsharp-wasm](https://github.com/fsharp-wasm/fsharp-wasm). The **host** that runs them on
 **Cloudflare Workers (with a Durable Object), Vercel, Netlify, Deno, Bun and Node** — the core, the adapters, the platform matrix and the deploy
 workflow — lives in [fsharp-wasm-edge](https://github.com/fsharp-wasm/fsharp-wasm-edge). This repository is where the modules are written.
