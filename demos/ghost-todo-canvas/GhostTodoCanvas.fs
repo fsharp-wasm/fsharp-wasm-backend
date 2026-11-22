@@ -5,7 +5,7 @@
 ///   onPointer(kind, x, y, button)   kind 0 down, 1 up, 2 move, 3 leave
 ///   onWheel(dx, dy)
 ///   onKey(kind)                     kind 0 down, 1 up; the key name is fetched with Gfx.pendingKey
-///   frame(nowMs)                    build, resolve, draw
+///   frame(nowMs)                    build, resolve, draw (when the model changed, an event was taken, or a caret is due: see CanvasHost.Frame)
 module GhostTodoCanvas.Entry
 
 open FSharp.Math
@@ -32,8 +32,9 @@ type Page() =
     member this.Dispatch(msg: Msg) : unit =
         let before = model.Shadow
         let model', effects = Model.update model msg
+        // an answer that changes nothing (the poll that finds no news, every second) draws nothing
+        if model' <> model then host.Invalidate()
         model <- model'
-        host.Invalidate()
         // a canvas has no DOM to read the list from: the page is told when it changes (the `gfx` event of the canvas: the version, and the todos one per line, "x " done and "o " open)
         if model'.Shadow <> before then
             Gfx.announce "sync" (string model'.Shadow.Version)
@@ -49,7 +50,7 @@ type Page() =
     member _.Input(evt: InputEvent) = host.Input evt
 
     member this.Frame(nowMs: float) =
-        host.Frame(nowMs, true, 0.0f, fun time size ->
+        host.Frame(nowMs, false, 0.0f, fun time size ->
             let ui : Ui<Msg> = { Theme = Theme.dark; Text = text; State = model.Ui; Time = time; Lift = UiMsg; Send = this.Dispatch }
             View.view ui size model)
 

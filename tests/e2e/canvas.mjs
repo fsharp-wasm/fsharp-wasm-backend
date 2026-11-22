@@ -51,6 +51,13 @@ await page.addInitScript(() => {
   document.addEventListener('DOMContentLoaded', () => document.getElementById('gfx').addEventListener('gfx', (e) => { if (e.detail.kind === 'sync') window.__sync.push({ version: Number(e.detail.a), todos: e.detail.b ? e.detail.b.split('\n') : [] }); }));
 });
 const last = () => page.evaluate(() => window.__sync.at(-1) ?? null);
+// every frame starts with a clearRect: count them (the host draws a frame only when something changed or a caret is due)
+await page.addInitScript(() => {
+  window.__frames = 0;
+  const clear = CanvasRenderingContext2D.prototype.clearRect;
+  CanvasRenderingContext2D.prototype.clearRect = function (...a) { window.__frames++; return clear.apply(this, a); };
+});
+const drawn = async (ms) => { const before = await page.evaluate(() => window.__frames); await page.waitForTimeout(ms); return (await page.evaluate(() => window.__frames)) - before; };
 
 try {
   await page.setViewportSize({ width: 1000, height: 700 });
@@ -64,6 +71,9 @@ try {
   });
   await page.waitForTimeout(800);
   check('the card is painted', (await painted()) > 6);
+  // the field has the focus: its caret changes twice a second, and the poll that asks for news every second finds none, so those answers draw nothing
+  const blinking = await drawn(2100);
+  check('the focused field draws a frame at each step of its caret, not every 16 ms', blinking >= 3 && blinking <= 8, `${blinking} frames in 2100 ms`);
 
   // a todo that another client adds: the client learns of it by polling the patches
   const added = await api('/api/todos', { method: 'POST', body: JSON.stringify({ text: 'from the api' }), headers: { 'content-type': 'application/json' } });
@@ -102,6 +112,11 @@ try {
   // and what the DOM page does shows on the canvas
   await dom.click('#list li:last-child button');
   check('a todo deleted on the DOM page disappears from the canvas', await waitFor(() => window.__sync.at(-1)?.todos.length === 1, 'sync'), JSON.stringify(await last()));
+
+  // nobody types and the server has nothing new (two polls go by): nothing is drawn
+  await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+  const quiet = await drawn(2100);
+  check('an idle page, polling a server that has nothing new, draws no frames', quiet === 0, `${quiet} frames in 2100 ms`);
 
   check('no page errors', errors.length === 0, JSON.stringify(errors).slice(0, 300));
 } catch (e) {
