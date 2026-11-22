@@ -15,6 +15,7 @@ All notable changes to this repository are documented here (newest first).
   `applyHex`, `ofState`) for this schema, with 7 tests (the patches of 300 random steps give the server's list; a gap, an unknown todo, a bad index and a bad record are errors and leave the shadow as it was).
 
 ### Changed
+- CI takes the host of fsharp-wasm-edge at the revision that serves the canvas client below `/canvas/` and runs 29 checks on every platform (it was 26).
 - **`FSharp.Wasm.Server` is split in two.** The host binding (`HostImports`, the store, `Host.run`) is `FSharp.Wasm.Server.Host`, a project of its own with the same namespace; `FSharp.Wasm.Server` keeps the protocol (HTTP types,
   GGBP, UTF-8, hex). A module that is a client of the protocol must not carry the imports of a host, and it did: a top-level value of the host module (`Host.store`) was initialised in every program that referenced the project,
   which put `runtime/server.js` into the imports of the browser module. A module that runs on a host references both (`demos/ghost-todo` does).
