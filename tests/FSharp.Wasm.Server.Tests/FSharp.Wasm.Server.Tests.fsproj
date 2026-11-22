@@ -9,6 +9,7 @@
     <Compile Include="PortableTests.fs" />
     <Compile Include="GhostTodoTests.fs" />
     <Compile Include="ShadowTests.fs" />
+    <Compile Include="CanvasClientTests.fs" />
     <Compile Include="PlatformTests.fs" />
   </ItemGroup>
 
@@ -24,6 +25,7 @@
     <ProjectReference Include="../../src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
     <ProjectReference Include="../../demos/ghost-todo-core/GhostTodoCore.fsproj" />
     <ProjectReference Include="../../demos/ghost-todo/GhostTodo.fsproj" />
+    <ProjectReference Include="../../demos/ghost-todo-canvas/GhostTodoCanvas.fsproj" />
     <ProjectReference Include="../../src/FSharp.Wasm.Protocol/FSharp.Wasm.Protocol.fsproj" />
     <ProjectReference Include="../../src/FSharp.Wasm.Host/FSharp.Wasm.Host.fsproj" />
     <ProjectReference Include="../../src/FSharp.Wasm.Sdk/FSharp.Wasm.Sdk.fsproj" />

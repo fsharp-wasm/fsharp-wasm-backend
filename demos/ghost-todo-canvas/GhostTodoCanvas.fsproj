@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The second Ghost Todo: the same API and the same patches as the page of the host, with the interface drawn by FSharp.Graphics widgets onto a canvas.
+       The model is a pure function (Model.fs: the shadow of the server's list, kept current by GGBP patches), the view is widgets (View.fs), and Entry.fs
+       is the module's exports and where the effects are carried out.  Compiled to WasmGC by fsharp-wasm: bash build/build-canvas.sh -> dist/GhostTodoCanvas.wasm;
+       the same sources run under .NET, where the tests call Model.update. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <RootNamespace>GhostTodoCanvas</RootNamespace>
+    <NuGetAudit>false</NuGetAudit>
+    <NoWarn>$(NoWarn);NU1900;NETSDK1188</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Model.fs" />
+    <Compile Include="View.fs" />
+    <Compile Include="GhostTodoCanvas.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../ghost-todo-core/GhostTodoCore.fsproj" />
+    <ProjectReference Include="../../src/FSharp.Wasm.Server/FSharp.Wasm.Server.fsproj" />
+    <ProjectReference Include="$(FSharpGraphicsRoot)/src/FSharp.Graphics.Canvas/FSharp.Graphics.Canvas.fsproj" />
+    <ProjectReference Include="$(FSharpGraphicsRoot)/src/FSharp.Graphics.Widgets/FSharp.Graphics.Widgets.fsproj" />
+    <ProjectReference Include="$(FSharpRuntimeRoot)/src/FSharpWasmRuntime.fsproj" />
+  </ItemGroup>
+</Project>

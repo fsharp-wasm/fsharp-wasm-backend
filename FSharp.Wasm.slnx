@@ -16,6 +16,7 @@
   <Folder Name="/demos/">
     <Project Path="demos/ghost-todo-core/GhostTodoCore.fsproj" />
     <Project Path="demos/ghost-todo/GhostTodo.fsproj" />
+    <Project Path="demos/ghost-todo-canvas/GhostTodoCanvas.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FSharp.Wasm.Tests/FSharp.Wasm.Tests.fsproj" />

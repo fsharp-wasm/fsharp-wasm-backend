@@ -8,4 +8,12 @@
     <FSharpWasmCoreRoot Condition="'$(FSharpWasmCoreRoot)' == ''">$(MSBuildThisFileDirectory)lib/fsharp-wasm-core</FSharpWasmCoreRoot>
     <FSharpWasmCoreDir Condition="'$(FSharpWasmCoreDir)' == ''">$(FSharpWasmCoreRoot)/FSharp.Wasm.Core</FSharpWasmCoreDir>
   </PropertyGroup>
+  <!-- Where fsharp-wasm-graphics (the widgets and the canvas host) and fsharp-wasm-runtime (the browser glue) are: only the canvas client (demos/ghost-todo-canvas)
+       builds on them.  FSHARP_GRAPHICS_DIR / FSHARP_RUNTIME_DIR: a checkout; otherwise the submodules lib/graphics and lib/runtime. -->
+  <PropertyGroup>
+    <FSharpGraphicsRoot Condition="'$(FSharpGraphicsRoot)' == '' and '$(FSHARP_GRAPHICS_DIR)' != ''">$(FSHARP_GRAPHICS_DIR)</FSharpGraphicsRoot>
+    <FSharpGraphicsRoot Condition="'$(FSharpGraphicsRoot)' == ''">$(MSBuildThisFileDirectory)lib/graphics</FSharpGraphicsRoot>
+    <FSharpRuntimeRoot Condition="'$(FSharpRuntimeRoot)' == '' and '$(FSHARP_RUNTIME_DIR)' != ''">$(FSHARP_RUNTIME_DIR)</FSharpRuntimeRoot>
+    <FSharpRuntimeRoot Condition="'$(FSharpRuntimeRoot)' == ''">$(MSBuildThisFileDirectory)lib/runtime</FSharpRuntimeRoot>
+  </PropertyGroup>
 </Project>

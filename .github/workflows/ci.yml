@@ -7,8 +7,11 @@ on:
 
 env:
   # fixed revisions of what the build takes from other repositories (replace the compiler by a release binary when there is one)
-  COMPILER_REF: 7a79ad6b07745169a606f9121eea03c148313bcd
-  CORE_REF: 52afb741ce65cb5690030549aa0a7b7e7bb1203c
+  COMPILER_REF: e820a4e3af38b74c751fc3e90fb9065b1126e476
+  CORE_REF: 529ec49eb4d740e403a4725bcd881620fa8b74d0
+  # the canvas client (demos/ghost-todo-canvas) builds on the widgets and the browser glue
+  GRAPHICS_REF: 4299f365d46ae3901083d48800d70e0420970200
+  RUNTIME_REF: dc56bd70aba3bbf23ae8ad82d5ffc6dd8e4106e2
   # the host the module is tested against: fsharp-wasm-edge at a fixed revision (the module and the host are developed apart)
   EDGE_REF: 0449bc7eaa8df501d173eafd6cf5094c507d30a5
 
@@ -24,12 +27,26 @@ jobs:
           repository: fsharp-wasm/fsharp-wasm-core
           ref: ${{ env.CORE_REF }}
           path: core
+      - name: fsharp-wasm-graphics
+        uses: actions/checkout@v6
+        with:
+          repository: fsharp-wasm/fsharp-wasm-graphics
+          ref: ${{ env.GRAPHICS_REF }}
+          path: graphics
+      - name: fsharp-wasm-runtime
+        uses: actions/checkout@v6
+        with:
+          repository: fsharp-wasm/fsharp-wasm-runtime
+          ref: ${{ env.RUNTIME_REF }}
+          path: runtime
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
       - name: Build and test
         env:
           FSHARP_WASM_CORE_DIR: ${{ github.workspace }}/core
+          FSHARP_GRAPHICS_DIR: ${{ github.workspace }}/graphics
+          FSHARP_RUNTIME_DIR: ${{ github.workspace }}/runtime
         run: dotnet test FSharp.Wasm.slnx -c Release
 
   # The module compiled by fsharp-wasm, and run on every platform that can run here by the host of fsharp-wasm-edge (the contract between them).
@@ -43,6 +60,18 @@ jobs:
           repository: fsharp-wasm/fsharp-wasm-core
           ref: ${{ env.CORE_REF }}
           path: core
+      - name: fsharp-wasm-graphics
+        uses: actions/checkout@v6
+        with:
+          repository: fsharp-wasm/fsharp-wasm-graphics
+          ref: ${{ env.GRAPHICS_REF }}
+          path: graphics
+      - name: fsharp-wasm-runtime
+        uses: actions/checkout@v6
+        with:
+          repository: fsharp-wasm/fsharp-wasm-runtime
+          ref: ${{ env.RUNTIME_REF }}
+          path: runtime
       - name: Host checkout (fsharp-wasm-edge)
         uses: actions/checkout@v6
         with:
@@ -103,6 +132,16 @@ jobs:
           FSHARP_COMPILER: ${{ github.workspace }}/compiler/vendor/fsharp/artifacts/bin/fsc/Release/net10.0/fsc.dll
         run: bash build/build.sh
 
+      # the client with widgets on a canvas: the same compiler, the widgets and the browser glue at fixed revisions
+      - name: Build GhostTodoCanvas.wasm and its page
+        env:
+          FSHARP_WASM_CORE_DIR: ${{ github.workspace }}/core
+          FSHARP_GRAPHICS_DIR: ${{ github.workspace }}/graphics
+          FSHARP_RUNTIME_DIR: ${{ github.workspace }}/runtime
+          FSHARP_WASM_DIR: ${{ github.workspace }}/compiler
+          FSHARP_COMPILER: ${{ github.workspace }}/compiler/vendor/fsharp/artifacts/bin/fsc/Release/net10.0/fsc.dll
+        run: bash build/build.sh --module canvas
+
       - name: The module on every platform
         working-directory: edge
         env:
@@ -112,7 +151,23 @@ jobs:
           node build/package.mjs
           node tests/platforms/run.mjs
 
+      # one locked Playwright (the runtime's) for the browser and the tests; the host's core and the module serve the API, the page of the canvas client is served beside it
+      - name: Chromium for the canvas client
+        working-directory: runtime
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+
+      - name: The canvas client in Chromium, next to the page of the host
+        env:
+          EDGE_DIR: ${{ github.workspace }}/edge
+          FSHARP_RUNTIME_DIR: ${{ github.workspace }}/runtime
+        run: node tests/e2e/canvas.mjs
+
       - uses: actions/upload-artifact@v7
         with:
           name: module
-          path: dist/GhostTodo.wasm
+          path: |
+            dist/GhostTodo.wasm
+            dist/GhostTodoCanvas.wasm
+            dist/canvas

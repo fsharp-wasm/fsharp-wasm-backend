@@ -4,7 +4,21 @@ All notable changes to this repository are documented here (newest first).
 
 ## [Unreleased]
 
+### Added
+- **The canvas client of the Ghost Todo** (`demos/ghost-todo-canvas`): a second todo for the same server, written in F# with the widgets of fsharp-wasm-graphics and compiled to WebAssembly GC (`GhostTodoCanvas.wasm`, 197 KB):
+  a field and a button, a scrollable list of check boxes with Delete, and the state of the shadow (host, version, patches applied, the last patch). It keeps a shadow of the server's list, applies the GGBP
+  patches of its own requests and of a poll once a second, copes with a server that is gone (it says so and keeps asking), a patch it has seen already and a gap in the patches (it fetches the state), and
+  can be driven by the keyboard alone. The model is a pure function whose requests are data, so the whole synchronisation is tested without a browser (`tests/FSharp.Wasm.Server.Tests/CanvasClientTests.fs`:
+  10 tests against the real `GhostTodo.route` in the same process), and in Chromium against the real module (`tests/e2e/canvas.mjs`). `build/build.sh --module canvas` makes the module and `dist/canvas/`, the page with
+  its runtime, which any static host can serve.
+- **`GhostTodoCore`** (`demos/ghost-todo-core`), shared by the server and its clients: the model (`Todos.fs`, moved out of `demos/ghost-todo`) and `Shadow.fs`, the client side of the patch format (`Shadow.apply`,
+  `applyHex`, `ofState`) for this schema, with 7 tests (the patches of 300 random steps give the server's list; a gap, an unknown todo, a bad index and a bad record are errors and leave the shadow as it was).
+
 ### Changed
+- **`FSharp.Wasm.Server` is split in two.** The host binding (`HostImports`, the store, `Host.run`) is `FSharp.Wasm.Server.Host`, a project of its own with the same namespace; `FSharp.Wasm.Server` keeps the protocol (HTTP types,
+  GGBP, UTF-8, hex). A module that is a client of the protocol must not carry the imports of a host, and it did: a top-level value of the host module (`Host.store`) was initialised in every program that referenced the project,
+  which put `runtime/server.js` into the imports of the browser module. A module that runs on a host references both (`demos/ghost-todo` does).
+- `Http.parseQuery` (it was private to `Host`) is public: the canvas client reads its address with it.
 - **JSON and number parsing come from [fsharp-wasm-core](https://github.com/fsharp-wasm/fsharp-wasm-core) (`FSharp.Wasm.Data`).** `FSharp.Wasm.Server` no
   longer has its own `Json.fs` and `Numbers.fs`; it references the shared project, which has the union of what this repository and the newsletter
   had (the 64-level nesting limit and strict string rules from here; error positions, a pretty printer and accessors with fallbacks from there).
