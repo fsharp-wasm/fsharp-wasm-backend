@@ -89,3 +89,12 @@ binary. Nothing reads them today: the build takes the F# base library from `FSHA
 
 Apache License 2.0 (`LICENSE`, `NOTICE`). The .NET libraries and their tests were written as a specification (the branch
 `copilot/fsharp-wasmgc-backend-library-spec` of the former repository); the portable layer, the demo, the adapters and the matrix are new.
+
+## Contributing
+
+Welcome. [CONTRIBUTING](https://github.com/fsharp-wasm/.github/blob/develop/CONTRIBUTING.md) is the organisation's guide and [AGENTS.md](AGENTS.md) says how the platform is worked on (the compiler comes first: a fault found here
+is fixed in the compiler, not worked around here).
+
+- **Run the tests:** `dotnet test FSharp.Wasm.slnx -c Release` (the .NET libraries and the portable layer).
+- **A good first contribution:** A case for the Ghost patch format (`Protocol`, `Ghost`) that the encoding tests do not cover. Issues labelled [`good first issue`](https://github.com/fsharp-wasm/fsharp-wasm-backend/labels/good%20first%20issue) are the places to start.
+- **A change** goes to `develop` as a pull request, with a test that fails without it. Open an issue first for anything larger than a fix.
